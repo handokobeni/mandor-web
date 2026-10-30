@@ -1,0 +1,43 @@
+export const metadata = { title: "Start a task · Mandor docs" };
+
+# Start a task
+
+Starting a task gives it a branch, a worktree, and an agent that already knows the task and its acceptance criteria.
+
+<Intro>
+  - What the Start dialog asks - How planning works - How to talk to the agent and read its changes
+</Intro>
+
+## The Start dialog
+
+Press **Start** on a ready task:
+
+| Option            | Meaning                                                                                                                             |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Repo or workspace | Where the agent works. A workspace creates one worktree per repo.                                                                   |
+| Planning          | **Plan**: the agent writes a plan first and waits for your approval. **Skip**: it starts implementing.                              |
+| Design source     | Optional. A folder of designs (for example an HTML prototype) the agent compares each AC against. See [AC review](/docs/ac-review). |
+| AC reviewer       | The skill used to review the AC before the PR.                                                                                      |
+| Start together    | Optional. Other cards of the same epic to do in one run. See [Grouped cards](/docs/grouped-cards).                                  |
+
+Mandor claims the record, creates the branch `mandor/<key>-<title>` from `origin`, starts Claude Code with the title, description, and AC, and moves Lark to **In Progress**.
+
+## Approve the plan
+
+With **Plan**, the run stops at **Plan ready**. Read the plan in the run panel:
+
+- **Approve** to let the agent implement it.
+- Reply in the chat to change it; the agent revises the plan.
+
+With a design source, the plan also marks each AC as In design, Partly, Missing, or Conflicts. If the design is newer than an AC, mark that AC **Follow design**; it leaves the push gate and the difference is written to the card's `mandor_design_gaps` field for the PM.
+
+## Work with the agent
+
+- **Chat:** reply when the card says **Waiting for you**. Messages you send while the agent works are queued for its next turn.
+- **Changes:** the diff of the task's worktree against the base branch, file by file. You can discard a file's changes.
+- **Run app:** for web repos, start the task's app from its worktree to try it yourself.
+
+<Note>
+  If the daemon restarts while an agent is working, the run is marked **Failed**. Press **Resume** to continue
+  in the same Claude session; nothing is lost.
+</Note>

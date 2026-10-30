@@ -1,3 +1,4 @@
+import createMDX from "@next/mdx";
 import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
@@ -29,6 +30,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  pageExtensions: ["ts", "tsx", "mdx"],
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
@@ -45,4 +47,8 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+// Docs pages are MDX; GitHub-flavoured Markdown for tables. Plugins are named
+// by string so Turbopack can use them.
+const withMDX = createMDX({ options: { remarkPlugins: ["remark-gfm"] } });
+
+export default withMDX(nextConfig);

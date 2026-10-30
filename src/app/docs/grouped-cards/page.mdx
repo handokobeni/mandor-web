@@ -1,0 +1,40 @@
+export const metadata = { title: "Grouped cards · Mandor docs" };
+
+# Grouped cards
+
+Several related cards (one epic, your part of the flow) can run as one run: one branch, one PR, card by card.
+
+<Intro>
+  - Which cards can go together - How to move from card to card - How the PR and Waiting Fix work for a group
+</Intro>
+
+## Which cards can join
+
+A card can join the group when it has the same **Epic** as the first card, you are its PIC, it is To Do and ready to start, and it has no other run. Cards that do not qualify are listed with the reason. Groups across people are not supported.
+
+## Start the group
+
+1. Press **Start** on one card of the flow.
+2. Under **Start together**, tick the other cards. The order you tick them is the order of the work; change it with the arrows.
+3. Choose the repo or workspace, planning, design source, and reviewer as usual, then **Start N cards**.
+
+Mandor claims every card, creates one branch, moves all of them to In Progress, and the agent starts on the first card with the context of the whole flow and that card's AC only.
+
+## Move from card to card
+
+When a card's turn is done, the **Group** panel lists every card as Waiting, Working, Done, or Removed.
+
+- **Next card** commits the current card's changes locally as `<KEY>: …`, marks it Done, and starts the next card in the same session.
+- **Finish card** does the same for the last card; then Push & create PR is available.
+- **Remove** takes a card that has not started out of the group; move it back to To Do in Lark.
+- **Stop group** pushes the finished cards' commits without a PR, closes the run, and releases every claim.
+
+Before starting the next card, Mandor checks it in Lark. If it is no longer In Progress or no longer yours, it leaves the group and you choose **Continue with …** or **Stop group**.
+
+## The PR
+
+**Push & create PR** checks every Done card in Lark again. If one changed after its commit, choose **Revert its commit** or **Keep in the PR** (with a reason that goes into the PR). The AC of all cards are reviewed once, labelled by card. The PR is titled `<first key>–<last key>: <epic>`, and every card moves to Waiting Review with the same PR link.
+
+## Waiting Fix in a group
+
+When QA moves one or more cards to Waiting Fix, the fix is made on the group's branch and PR. Only the cards that were fixed move back through In Progress to Waiting Review. While a card is in Waiting Fix, the PR description says **Do not merge**.

@@ -1,0 +1,50 @@
+export const metadata = { title: "Troubleshooting · Mandor docs" };
+
+# Troubleshooting
+
+Common problems and what to do about them. The daemon's log is `~/.mandor/mandord.log` (JSON lines); tokens are never written to it.
+
+<Intro>- Connection and install problems - Lark and board problems - Review and overnight problems</Intro>
+
+## The app cannot reach the daemon
+
+| Symptom                                      | What to do                                                                                                                                           |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "Daemon unreachable"                         | `~/.local/bin/mandord token` must print a token (on Windows: `wsl -- sh -lc '~/.local/bin/mandord token'`). Check `systemctl --user status mandord`. |
+| "The bundled daemon does not match this app" | The installer or package is damaged. Check `SHA256SUMS` and install again.                                                                           |
+| The service keeps failing to start           | `journalctl --user -u mandord -n 50`. Usually another daemon still holds `~/.mandor/daemon.lock` (`pgrep -a mandord`).                               |
+| "Version mismatch"                           | The app and `mandord` differ by a major version. Install the latest package.                                                                         |
+| The service stops when you log out           | Linger is off: `sudo loginctl enable-linger "$USER"`.                                                                                                |
+
+## Lark and the board
+
+| Symptom                                    | What to do                                                                                                          |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| The board is empty after login             | The tasks are not assigned to you, or `mandor_modified` is missing (the five-minute full refresh still loads them). |
+| "Lark session expired"                     | Log in with Lark again.                                                                                             |
+| The Lark login never comes back to the app | The browser calls `127.0.0.1:53682`; make sure no other program uses that port.                                     |
+| A card says "Sync failed"                  | Read the detail on the card, fix the cause, and press **Retry**.                                                    |
+| A card says "Overwritten by Lark"          | The status changed in Lark first. Lark wins.                                                                        |
+| Waiting Fix comments are not read          | The comments API is refused (scope). Use the card's **Fix Notes** field.                                            |
+
+## Agents, review, and PRs
+
+| Symptom                                                 | What to do                                                                    |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| A run says Failed after a restart or sleep              | Press **Resume**; it continues in the same Claude session.                    |
+| A review ran without the browser: "No app for this run" | The repo's test mode is No app, or the app is not running. Press **Run app**. |
+| "Claude in Chrome extension not connected"              | Run `claude --chrome` once, then **Check connection** in Settings → About.    |
+| The app failed: port already in use                     | Another program uses the port. Stop it or change the port.                    |
+| The review is stale                                     | The code changed after the verdicts. Review again before pushing.             |
+| A design source says Path missing                       | The folder moved. Fix the path in Settings → Design sources.                  |
+
+## Overnight VM
+
+| Symptom                                                                            | What to do                                                                                                                     |
+| ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| The Overnight tab says "VM offline" with "Connection closed by UNKNOWN port 65535" | With IAP, your `gcloud` login on the laptop expired. Run `gcloud auth login`, then `ssh lembur hostname`. The VM kept working. |
+| A run fails with "sudo: a password is required"                                    | The sudoers rule does not match the binary's path. See [Set up the VM](/docs/overnight/vm-setup).                              |
+| The daemon does not start: "MANDOR_ROLE=vm needs …"                                | The `vm.conf` drop-in is incomplete.                                                                                           |
+| "refusing to run git: the repo config sets …"                                      | The clone's config has a key the VM does not trust. Remove it with `git config --unset <key>`.                                 |
+| "Host key verification failed"                                                     | The VM's host key changed. Remove the VM in the app and confirm the new fingerprint with your admin.                           |
+| Browser checks on the VM are Can't verify                                          | Turn on **Setup command prepares a test login** in the VM's repo settings.                                                     |

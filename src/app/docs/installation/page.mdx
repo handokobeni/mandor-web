@@ -1,0 +1,92 @@
+export const metadata = { title: "Installation · Mandor docs" };
+
+# Installation
+
+One package carries the app and the daemon at the same version. On first launch the app installs the daemon as a systemd user service, so agents keep working when you close the window, quit the app, or the app crashes.
+
+<Intro>
+  - How to install on Windows with WSL, and on Linux - How to keep agents working while you are away - How to
+  update and uninstall
+</Intro>
+
+## Windows with WSL
+
+The daemon, git, `gh`, and Claude Code run inside WSL; the app window runs on Windows.
+
+### Prepare WSL (once)
+
+Use WSL 2 from the Microsoft Store with an Ubuntu distro, and turn on systemd:
+
+```bash
+printf '[boot]\nsystemd=true\n' | sudo tee -a /etc/wsl.conf
+```
+
+Then run `wsl --shutdown` in PowerShell and open WSL again. `systemctl --user status` should show no error. Keep the service alive when no WSL session is open:
+
+```bash
+sudo loginctl enable-linger "$USER"
+```
+
+Keep the repos you work on inside the WSL file system (for example `~/work/app`), not under `/mnt/c/...`, so git and the agents are fast and file permissions are right.
+
+### Install the app
+
+1. Run `mandor_<version>_x64-setup.exe`. The installer is not signed yet, so SmartScreen warns you: choose **More info → Run anyway**.
+2. If your distro is not the default one, set the user environment variable `MANDOR_LINK=wsl:Ubuntu-24.04` (the name from `wsl -l -v`).
+3. Open Mandor. The first time, it checks the bundled daemon, installs it into WSL (`~/.local/bin/mandord`), registers the service, and connects.
+
+## Linux
+
+Supported: distros with systemd (Ubuntu 22.04+, Fedora 39+), GNOME or KDE, x86_64.
+
+Download the package and `SHA256SUMS` into one folder and check them:
+
+```bash
+sha256sum -c SHA256SUMS --ignore-missing
+```
+
+Then install:
+
+```bash
+# Ubuntu / Debian
+sudo apt install ./mandor_<version>_amd64.deb
+
+# Fedora / RHEL / openSUSE
+sudo dnf install ./mandor-<version>-1.x86_64.rpm
+
+# Other distros
+chmod +x mandor_<version>_amd64.AppImage && ./mandor_<version>_amd64.AppImage
+```
+
+Keep the service running after you log out, then open Mandor:
+
+```bash
+sudo loginctl enable-linger "$USER"
+```
+
+## Keep agents working while you are away
+
+Open **Settings → Background work**. Agents keep working unattended when every row says **Ready**:
+
+| Row                         | Meaning                                                                                                                                 |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Daemon runs as a service    | systemd runs the daemon and restarts it if it crashes.                                                                                  |
+| Linger is on                | The service stays up with no open session.                                                                                              |
+| WSL stays on without Mandor | Windows only. **Keep WSL on** sets `instanceIdleTimeout=-1` and `vmIdleTimeout=-1` in `.wslconfig` (a backup is kept).                  |
+| Keep-awake ready            | While an agent, review, or publish is working, the daemon holds off sleep (not the screen), and lets go five minutes after it finishes. |
+
+<Pitfall>
+  Mandor does not handle a closed lid or a flat battery. Keep the laptop plugged in and set "When I close the
+  lid" to **Do nothing** while plugged in.
+</Pitfall>
+
+## Update
+
+Install the new version and open the app. If agents are working, the daemon is not replaced yet: Background work shows **Update waiting for running agents**, and the app tries again when they finish.
+
+## Uninstall
+
+- **Windows:** uninstall Mandor from Windows Settings → Apps. The uninstaller stops and removes the daemon in WSL and the two `.wslconfig` keys it added.
+- **Linux:** first **Settings → Background work → Remove service…**, then quit Mandor, then remove the package (`sudo apt remove mandor` or `sudo dnf remove mandor`).
+
+Your data in `~/.mandor` (database, Lark login) is kept. Delete it yourself if you no longer need it.

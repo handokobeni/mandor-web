@@ -1,0 +1,30 @@
+export const metadata = { title: "Push & create PR · Mandor docs" };
+
+# Push & create PR
+
+One button commits the agent's work, pushes the task's branch, and opens the pull request. The agent itself is never allowed to push.
+
+<Intro>- What Push & create PR does, step by step - What can hold the push - What lands in Lark</Intro>
+
+## What happens
+
+1. If the acceptance criteria have not been reviewed for this code, the [AC review](/docs/ac-review) runs first.
+2. The push gate checks the review: a **Fail** blocks the push (in Block mode) or warns (in Warn mode). A **Can't verify** needs your confirmation.
+3. Mandor commits with a message written from the diff, pushes `mandor/<key>-…`, and opens the PR with an AC summary in the description.
+4. Lark moves to **Waiting Review**, and the PR link is written to the card.
+
+Merging stays with your team. Mandor never merges to `main`.
+
+## What can hold the push
+
+| Hold                                         | What to do                                                                                                            |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| An AC failed review                          | Send the findings to the agent from the AC review tab, or **Push anyway** with a reason; the reason goes into the PR. |
+| An AC could not be verified                  | Check it yourself and tick **I checked this myself**.                                                                 |
+| Changes touch CI, agent config, or git hooks | Review the files, then confirm. Mandor never pushes these without you.                                                |
+| The code changed after review                | The review is stale. Run it again.                                                                                    |
+
+<Pitfall>
+  **Push anyway** is recorded in the PR description with your reason, so reviewers can see which AC you pushed
+  over.
+</Pitfall>

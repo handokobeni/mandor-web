@@ -1,0 +1,49 @@
+export const metadata = { title: "The board · Mandor docs" };
+
+# The board
+
+The board shows your Lark Sprint Tasks as columns, with every running agent in the sidebar.
+
+<Intro>
+  - How Lark statuses map to columns - Which tasks can be started - What the sidebar and card flags tell you
+</Intro>
+
+## Columns come from Lark
+
+Columns follow each task's **Task Status** in Lark. There is no second board, and you cannot drag cards: a card moves when you press **Start** or **Push & create PR**, or when someone changes the status in Lark.
+
+| Lark Task Status          | Mandor column                 |
+| ------------------------- | ----------------------------- |
+| To Do                     | Todo                          |
+| In Progress, Waiting Fix  | In Progress                   |
+| Waiting Review, In Review | Review                        |
+| Waiting Deploy, Delivered | Done                          |
+| Anything else             | Unknown, shown only when used |
+
+**Mine** shows the tasks assigned to you; **Team** shows everyone's, read-only. Mandor polls Lark often, and a full refresh runs every five minutes; press **Refresh** to sync now.
+
+## Which tasks can be started
+
+**Start** appears only on a task in Todo whose Development Readiness is **Ready To Dev** or **Commit To Sprint**. Other cards say why they cannot start, for example "not ready, Development Readiness Review AC By PM".
+
+Each task has one owner. If two people press Start on the same task, one claim wins and the other sees **lost the claim**; nothing is created on their machine. A claim that has gone inactive can be taken over later.
+
+## The sidebar: active agents
+
+Every run is listed in the sidebar with its state:
+
+| State           | Meaning                                                                                                             |
+| --------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Working         | The agent is busy.                                                                                                  |
+| Waiting for you | The agent finished its turn or asked a question. Pinned to the top, with a count in the title bar and the tray.     |
+| Plan ready      | The agent wrote a plan for you to approve.                                                                          |
+| Failed          | The run stopped, for example because the daemon restarted. Press **Resume** to continue in the same Claude session. |
+| Parked          | The run is paused, for example after its claim was lost.                                                            |
+
+## Card flags
+
+| Flag                  | What to do                                                                               |
+| --------------------- | ---------------------------------------------------------------------------------------- |
+| Sync failed           | A write to Lark failed. Read the detail on the card, fix the cause, and press **Retry**. |
+| Overwritten by Lark   | The status changed in Lark before Mandor's write. Lark wins; nothing to undo.            |
+| On VM / Queued for VM | The card belongs to your [overnight VM](/docs/overnight). It is read-only on the laptop. |

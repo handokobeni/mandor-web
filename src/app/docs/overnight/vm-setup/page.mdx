@@ -1,0 +1,135 @@
+export const metadata = { title: "Set up the VM · Mandor docs" };
+
+# Set up the VM
+
+Each developer gets their own daemon on the shared VM, with agents running as a separate Linux user. This page has the admin's steps, then each developer's.
+
+<Intro>
+  - What the admin prepares for each developer - How each developer installs the daemon and logs in - How to
+  connect the app over SSH, including through IAP
+</Intro>
+
+In the examples, the developer is `dev`, the agent user `dev-agent`, the group `dev-mandor`, and the group directory `/srv/mandor/dev`.
+
+## Admin: users, group, and directories
+
+```bash
+sudo useradd -m -s /bin/bash dev-agent
+sudo groupadd dev-mandor
+sudo usermod -aG dev-mandor dev
+sudo usermod -aG dev-mandor dev-agent
+
+# Clones, worktrees, and run files: the daemon and agent write, nobody else.
+sudo install -d -o dev -g dev-mandor -m 2770 /srv/mandor/dev
+sudo install -d -o dev -g dev-mandor -m 2770 /srv/mandor/dev/workspaces
+sudo install -d -o dev -g dev-mandor -m 2770 /srv/mandor/dev/runs
+
+# The agent may run mandord from ~/.local/bin; ~/.mandor stays private.
+sudo chmod 0711 /home/dev
+sudo -u dev mkdir -p /home/dev/.local/bin
+sudo chmod 0755 /home/dev/.local /home/dev/.local/bin
+
+# Both services stay up without a login session.
+sudo loginctl enable-linger dev
+sudo loginctl enable-linger dev-agent
+```
+
+## Admin: the sudoers rule
+
+The daemon starts agents only through `mandord agent-exec`. Add exactly this rule with `sudo visudo -f /etc/sudoers.d/mandor-dev`:
+
+```text
+dev ALL=(dev-agent) NOPASSWD: /home/dev/.local/bin/mandord agent-exec *
+```
+
+There is no fallback to the developer's own user: if the rule is wrong, the run fails and says so.
+
+## Admin: tools, ports, and Lark
+
+- Install Claude Code for the agent user, and Playwright MCP for the headless review: `sudo npm install -g @playwright/mcp`, then `sudo -iu dev-agent npx playwright install chromium`.
+- Give each developer a port range, for example 5100–5199. Repo app ports and the Lark callback port must be inside it.
+- In the Lark Custom App, add the redirect URL `http://127.0.0.1:5199/callback` (the developer's callback port), and give the app the bot capability and permission to send messages, for the morning report.
+
+<Security>
+  Mandor's guards refuse commands that mention staging, remote databases, or messaging services, but these are
+  text checks. The real boundary is an outbound firewall for the agent users that blocks your staging hosts
+  and team databases.
+</Security>
+
+## Developer: install the daemon in VM mode
+
+Copy the `mandord` binary of the same version as your app to the VM, then:
+
+```bash
+./mandord install
+mkdir -p ~/.config/systemd/user/mandord.service.d
+cat > ~/.config/systemd/user/mandord.service.d/vm.conf <<'CONF'
+[Service]
+Environment=MANDOR_ROLE=vm
+Environment=MANDOR_AGENT_USER=dev-agent
+Environment=MANDOR_GROUP_DIR=/srv/mandor/dev
+Environment=MANDOR_PORT_RANGE=5100-5199
+CONF
+systemctl --user daemon-reload
+systemctl --user restart mandord
+```
+
+## Developer: SSH from your laptop
+
+The app and the Lark login use real `ssh` from your laptop (WSL on Windows). Add one alias to `~/.ssh/config`:
+
+```text
+# The VM has an external IP and your key is registered
+Host lembur
+    HostName <external IP>
+    User dev
+    IdentityFile ~/.ssh/id_ed25519
+
+# Or, on Google Cloud without an external IP: through IAP
+Host lembur
+    User dev
+    IdentityFile ~/.ssh/google_compute_engine
+    ProxyCommand gcloud compute start-iap-tunnel <instance> 22 --listen-on-stdin --zone <zone>
+```
+
+Use only one of the two blocks. `ssh lembur hostname` must work without a password.
+
+## Developer: connect the app
+
+1. In the app: **Settings → Overnight VM**, enter `lembur`, check the host key fingerprint with your admin, and press **Trust and connect**.
+2. Switch Settings to **VM**, then fill in **Lark** (with **Callback port** 5199), and add the repos under `/srv/mandor/dev/workspaces` with app ports inside your range.
+
+## Developer: log in on the VM
+
+```bash
+# On the VM, as your user
+gh auth login
+sudo -iu dev-agent claude     # Claude Code login for the agent user
+```
+
+Log the VM's daemon in to Lark through a tunnel for the callback:
+
+```bash
+# On your laptop
+ssh -L 5199:127.0.0.1:5199 lembur
+# Then, in that VM prompt
+mandord login lark
+```
+
+Open the printed link in your laptop's browser. The **Overnight** tab shows all three logins as ready.
+
+## When the VM restarts
+
+The daemon and the agent user's services start on boot. The queue, settings, usage, and worktrees are kept. A card that was running becomes **Failed**; press **Queue again** to continue it, or **Take over to laptop**.
+
+## When a developer leaves
+
+```bash
+sudo -iu dev systemctl --user disable --now mandord
+sudo loginctl disable-linger dev; sudo loginctl disable-linger dev-agent
+sudo rm /etc/sudoers.d/mandor-dev
+sudo -iu dev gh auth logout
+sudo userdel -r dev-agent; sudo rm -rf /srv/mandor/dev
+```
+
+Revoke the developer's Lark token in the Lark console if needed.

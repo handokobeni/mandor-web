@@ -1,0 +1,50 @@
+export const metadata = { title: "Quick start · Mandor docs" };
+
+# Quick start
+
+Mandor runs a crew of Claude Code agents from one kanban board that stays in sync with your Lark Base Sprint Tasks. This page gets you from install to your first pull request.
+
+<Intro>
+  - What Mandor is made of - The five things to set up once - How a task travels from Lark to a pull request
+</Intro>
+
+## How Mandor works
+
+Mandor has two parts:
+
+- **`mandord`**, a daemon that holds all the logic: Lark sync, git worktrees, the Claude Code agents, and a local SQLite database. It runs as a user service on Linux, or inside WSL on Windows.
+- **The Mandor app**, a desktop window that only shows the board, the agents, and their chats. It talks to the daemon.
+
+Lark stays the source of truth. Mandor reads titles, descriptions, acceptance criteria (AC), and assignees from your Sprint Tasks table and never edits them. It moves a task's status only in three places: To Do → In Progress, In Progress → Waiting Review, and Waiting Fix → In Progress.
+
+## Set up once
+
+1. [Install Mandor](/docs/installation) on Windows (with WSL) or Linux.
+2. [Set up a Lark Custom App](/docs/lark) and point Mandor at your Sprint Tasks base.
+3. Log in to [GitHub and Claude Code](/docs/github-and-claude) on the machine where the daemon runs.
+4. [Add a repo](/docs/repos) for the agents to work in.
+5. Log in with Lark from the app. Your assigned tasks appear on the board.
+
+<Note>
+  Try Mandor on a copy of your Sprint Tasks base first (in Lark: **… → Duplicate**), so your team's real board
+  does not change while you learn.
+</Note>
+
+## Your first task
+
+1. On the board, find a task in **Todo** with Development Readiness **Ready To Dev**, and press **Start**.
+2. Mandor claims the Lark record, creates a git worktree for the task, starts Claude Code with the task and its AC, and moves the task to **In Progress**.
+3. The agent proposes a plan. Read it in the run panel and approve it, or reply with changes.
+4. When the agent finishes its turn, the card shows **Waiting for you**. Check the reply and the diff.
+5. Press **Push & create PR**. Mandor reviews the AC, commits, pushes the task's branch, opens the PR, and moves Lark to **Waiting Review**.
+
+Merging stays with your team. If a reviewer moves the task to **Waiting Fix** and comments in Lark, the agent [fixes it on its own](/docs/waiting-fix).
+
+## What you need
+
+| Tool                         | Notes                                                                |
+| ---------------------------- | -------------------------------------------------------------------- |
+| Claude Code                  | Your own subscription, logged in. No API key.                        |
+| Lark Custom App              | Access to your Sprint Tasks table and its Acceptance Criteria table. |
+| GitHub CLI (`gh`)            | Logged in where the daemon runs. It opens the PRs.                   |
+| Linux, or Windows with WSL 2 | macOS is not supported yet.                                          |

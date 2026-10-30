@@ -1,0 +1,64 @@
+export const metadata = { title: "AC review · Mandor docs" };
+
+# AC review
+
+Before the PR, a reviewer checks every acceptance criterion against the code and tests, and, for web apps, in your browser. Each AC comes back **Pass**, **Fail**, or **Can't verify**.
+
+<Intro>
+  - How the review runs and what the push gate does with it - How to let the reviewer test your web app in
+  Chrome - How to use design sources and the "Design gaps" view
+</Intro>
+
+## How the review runs
+
+**Push & create PR** starts a review when the AC have not been reviewed for the current code; you can also start one by hand from the **AC review** tab. The reviewer reads the code and tests and, when the task's app is running, tries it in Chrome. It cannot edit files.
+
+The AC review tab lists each AC with its verdict and evidence. Then the [push gate](/docs/push-and-pr) applies: Fail blocks or warns, depending on the repo's **Push & PR gate**, and Can't verify needs your confirmation.
+
+## Let the reviewer use your browser
+
+The reviewer works in your Chrome-family browser (Chrome, Edge, or Chromium) through the **Claude in Chrome** extension.
+
+1. Install Claude in Chrome from the Chrome Web Store and log in with the same Claude account as `claude` on the daemon's machine.
+2. On WSL, run `claude --chrome` once in a WSL terminal to connect Chrome on Windows to `claude` in WSL.
+3. In Mandor, open **Settings → About → Claude in Chrome → Check connection**.
+
+During a review, the reviewer only uses tabs it opened itself, may only visit the task's app, cannot run scripts on the page, and cannot upload files.
+
+<Pitfall>
+  The page content is read by the AI model. Never log in to the app with a production account or real customer
+  data.
+</Pitfall>
+
+## Set up a web repo
+
+In **Settings → Repos**, choose the repo:
+
+| Setting                        | What to enter                                                                                                                                                               |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Test mode                      | **Web** if the repo has an app to try; **No app** makes UI criteria Can't verify.                                                                                           |
+| Setup command                  | Optional, for example `bun install`. Runs when the lockfile changed.                                                                                                        |
+| Start command                  | For example `bun run dev`.                                                                                                                                                  |
+| Port                           | The port the app opens, for example `5173`.                                                                                                                                 |
+| App URL                        | Optional. Where you log in; login cookies are tied to this host.                                                                                                            |
+| .env keys                      | Key names passed from the repo's `.env`. Values are never shown or copied into the worktree. Local or dev credentials only.                                                 |
+| Browser testing                | Let the reviewer test the app in the browser.                                                                                                                               |
+| Restart the app before reviews | Optional. Restarts a stale app from the latest code before a browser review. The agent's code then runs with the chosen `.env` keys without you checking the changes first. |
+
+Before the first browser review, start the app with **Run app** in the task's workspace, log in, and press **I'm logged in**. Databases and other services stay yours to run.
+
+## Design sources
+
+**Settings → Design sources → Add source**: a name and the path of a folder with designs, such as an HTML prototype. Mandor only reads it, and the agent cannot write to it. Choose it in the Start dialog, and the plan compares each AC with the design.
+
+## The "Design gaps" view in Lark
+
+When an AC differs from the design, Mandor writes one line per AC to the card's `mandor_design_gaps` field, for example `AC-4: Conflicts with design: amber dot, not red badge`. Give designers and PMs a view:
+
+1. In Sprint Tasks, add a Grid view named **Design gaps**.
+2. Filter: `mandor_design_gaps` is not empty.
+3. Show the title, Assignee, Task Status, and `mandor_design_gaps`, newest first.
+
+## Cost and limits
+
+**Settings → General → AC reviewer** sets the reviewer's model, a cost limit per review (US$2.00 by default), and a time limit (15 minutes by default). A review that hits a limit ends **Failed**, and the AC it did not reach stay Not reviewed. **AC review → Review history** shows each review's trigger, whether the browser was used, the cost, and the tokens.

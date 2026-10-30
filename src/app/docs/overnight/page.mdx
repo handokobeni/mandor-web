@@ -1,0 +1,67 @@
+export const metadata = { title: "Overnight on a VM · Mandor docs" };
+
+# Overnight on a VM
+
+Queue ready tasks in the evening and let agents work through them on a team VM while you are away. In the morning, a report in Lark tells you what got done, what got parked, and what needs your decision.
+
+<Intro>
+  - How the VM fits next to your laptop - How to queue cards, set the hours, and cap usage - What the VM is
+  and is not allowed to do - How to read the report and decide in the morning
+</Intro>
+
+## How it fits together
+
+Each developer runs a second daemon on a shared Linux VM, under their own Linux user; agents there run as a separate agent user. Your laptop keeps its own daemon. The app talks to both: to the VM over SSH.
+
+On the laptop board, a queued card shows **Queued for VM**, and a card the VM is working on shows **On VM** and is read-only.
+
+<Note>
+  The VM must be set up first by an admin and by you. See [Set up the VM](/docs/overnight/vm-setup).
+</Note>
+
+## Hours and usage limit
+
+Open the **Overnight** tab and set:
+
+| Setting       | Meaning                                                                      |
+| ------------- | ---------------------------------------------------------------------------- |
+| Starts / Ends | The overnight window, in your UTC offset. Queued cards start only inside it. |
+| UTC offset    | Your time zone, for example UTC+07:00 (WIB).                                 |
+| Usage limit   | Tokens per cycle. The VM starts nothing until you set it.                    |
+
+A cycle runs from one start time to the next. **Start now** runs and daytime Waiting Fix runs count toward the same limit. The limit counts input, output, and cache-write tokens, plus 10% of cache-read tokens, for the agent and the AC reviewer. When it is reached, the running card stops and is parked with **Usage limit reached**, and no other card starts until the next cycle.
+
+## Queue cards
+
+In **Queue**, search for a To Do card by key or title, choose the repo or workspace on the VM, and press **Add to queue**. Reorder with the arrows. **Start now** runs a card right away, outside the window.
+
+Just before a card starts, the VM checks it again. A card that someone moved to In Progress, that is no longer assigned to you, or that is no longer ready leaves the queue, with the reason listed under **Removed from the queue this cycle**.
+
+## What the VM does at night
+
+- **No planning step.** Cards go straight to implementation; nobody is there to approve a plan.
+- **Headless AC review.** The VM starts the task's app and reviews the AC in a headless browser. If a criterion cannot be verified or fails, the card is parked; nothing is pushed.
+- **Sensitive changes are held.** Changes to CI, agent config, or git hooks wait for you.
+- **Draft PRs only.** A card that passes the gate becomes a draft PR. Lark stays **In Progress** until you press **Send to review**.
+- **Never past Waiting Review.** The VM never merges, never pushes to another branch, and never messages anyone but you.
+
+Cards run one at a time. A card moved to Waiting Fix runs when the VM is free, ahead of the next queued card.
+
+<Pitfall>
+  A web repo needs **Setup command prepares a test login** turned on in the VM's repo settings (even if the
+  app has no login), or browser checks on the VM come back Can't verify.
+</Pitfall>
+
+## In the morning
+
+When the window ends and the last card stops, a Lark bot sends you one message: draft PRs ready, cards parked, cards removed from the queue, usage, and the cards that need your decision. Open the **Overnight** tab:
+
+| Group                      | What to do                                                                                                                                   |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Draft PRs ready            | Check the PR, then **Send to review**. The PR leaves draft and Lark moves to Waiting Review.                                                 |
+| Parked: AC gate            | **Decide AC…**: confirm criteria you checked yourself, then **Push and create draft PR**. If the review broke off, this starts a new review. |
+| Parked: needs confirmation | Check the CI or config change, then **Confirm and push**.                                                                                    |
+| Parked: needs you          | The agent asked a question or the usage limit stopped it. **Answer and queue** sends it back to the queue on the same branch.                |
+| Failed                     | The VM restarted mid-card. **Queue again** continues on the same branch and session.                                                         |
+
+Any parked or failed card can also be moved to your laptop with **Take over to laptop**: the VM commits and pushes its work in progress to the card's branch (no PR), the claim moves to your laptop, and the run opens there on the same branch.

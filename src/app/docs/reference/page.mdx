@@ -1,0 +1,41 @@
+export const metadata = { title: "Data, logs, and environment · Mandor docs" };
+
+# Data, logs, and environment
+
+Where Mandor keeps its data, and the environment variables the daemon reads.
+
+<Intro>- Where your data, logins, and worktrees live - The environment variables and their defaults</Intro>
+
+## Files and folders
+
+| Path                                     | Contents                                                                           |
+| ---------------------------------------- | ---------------------------------------------------------------------------------- |
+| `~/.mandor/mandor.db`                    | SQLite: task cache, runs, chats, outbox                                            |
+| `~/.mandor/mandord.log`                  | The daemon's log (JSON)                                                            |
+| `~/.mandor/lark.json`                    | Lark settings, readable only by you                                                |
+| `~/.mandor/secrets/lark-token.json`      | Your Lark user token, readable only by you                                         |
+| `~/.mandor/daemon.json`                  | The running daemon's port, token, and pid                                          |
+| `~/.local/share/mandor/workspaces/`      | One worktree per task, outside `~/.mandor` because agents may not read that folder |
+| `~/.local/bin/mandord`                   | The installed daemon                                                               |
+| `~/.config/systemd/user/mandord.service` | The daemon's user service                                                          |
+
+## Environment variables
+
+| Variable                | Default                                | Purpose                                                                     |
+| ----------------------- | -------------------------------------- | --------------------------------------------------------------------------- |
+| `MANDOR_LINK`           | `local` on Linux, `wsl` on Windows     | How the app reaches the daemon: `local:/path/mandord` or `wsl:<distro>`     |
+| `MANDOR_HOME`           | `~/.mandor`                            | The daemon's data folder; worktrees then live in `$MANDOR_HOME/workspaces/` |
+| `MANDOR_LOG`            | `info`                                 | The daemon's log filter, for example `debug`                                |
+| `MANDOR_CLAUDE_BIN`     | `claude`                               | The Claude Code binary agents use                                           |
+| `MANDOR_ROLE`           | `laptop`                               | `vm` for the [overnight VM](/docs/overnight)                                |
+| `MANDOR_AGENT_USER`     | none                                   | VM only: the Linux user agents run as                                       |
+| `MANDOR_GROUP_DIR`      | none                                   | VM only: the developer's clones, worktrees, and run files                   |
+| `MANDOR_PORT_RANGE`     | none                                   | VM only: the developer's ports, for example `5100-5199`                     |
+| `MANDOR_PLAYWRIGHT_MCP` | `/usr/local/bin/mcp-server-playwright` | VM only: the Playwright MCP binary for headless review                      |
+
+## Logs on a service
+
+```bash
+journalctl --user -u mandord -n 100     # service log
+tail -f ~/.mandor/mandord.log           # daemon log
+```

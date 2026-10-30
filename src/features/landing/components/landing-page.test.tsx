@@ -27,12 +27,15 @@ describe("landing page", () => {
     const targets = within(nav)
       .getAllByRole("link")
       .map((a) => a.getAttribute("href") ?? "");
-    expect(targets).toHaveLength(7);
-    for (const href of targets) {
-      expect(container.querySelector(href), href).not.toBeNull();
+    expect(targets).toContain("/docs");
+    // Section links are absolute ("/#lark") so they also work from the docs.
+    const sections = targets.filter((h) => h.startsWith("/#"));
+    expect(sections).toHaveLength(7);
+    for (const href of sections) {
+      expect(container.querySelector(href.slice(1)), href).not.toBeNull();
     }
     for (const a of screen.getAllByRole("link", { name: "Join early access" })) {
-      expect(container.querySelector(a.getAttribute("href") ?? "")).not.toBeNull();
+      expect(container.querySelector((a.getAttribute("href") ?? "").replace(/^\//, ""))).not.toBeNull();
     }
   });
 

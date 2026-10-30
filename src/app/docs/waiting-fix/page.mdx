@@ -1,0 +1,33 @@
+export const metadata = { title: "The Waiting Fix loop · Mandor docs" };
+
+# The Waiting Fix loop
+
+Reviewers keep working the way they do today: move the task to **Waiting Fix** in Lark and comment on the record. Mandor handles the rest.
+
+<Intro>
+  - What happens after a reviewer asks for a fix - Whose comments reach the agent - What to do when comments
+  cannot be read
+</Intro>
+
+## The loop
+
+1. A reviewer moves the task to **Waiting Fix** and comments on the Lark record.
+2. **Quiet period:** Mandor waits about two minutes so the reviewer can finish writing.
+3. **Trusted comments forwarded:** comments from the assignees, the reporter, and the repo's trusted reviewers go to the agent. Comments from anyone else are shown to you only.
+4. **Fixing:** Lark moves to In Progress. The agent applies the feedback in the same worktree, the AC are reviewed again, and Mandor pushes to the same PR.
+5. **Back to Waiting Review**, with nobody opening a terminal.
+
+If the review after the fix finds a failing AC, the push is held and the card waits for you.
+
+## Choose trusted reviewers
+
+In **Settings → Repos → Trusted reviewers and QA**, search for people by name and add them. Assignees and the reporter are always trusted.
+
+<Security>
+  Comment text reaches the agent as untrusted content. A comment from someone who is not trusted is never
+  forwarded on its own; you decide.
+</Security>
+
+## When comments cannot be read
+
+If Lark refuses the comments API (usually a missing scope), write the feedback in the card's **Fix Notes** field. Mandor forwards it the same way.

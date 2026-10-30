@@ -1,0 +1,53 @@
+export const metadata = { title: "Set up Lark · Mandor docs" };
+
+# Set up Lark
+
+Mandor reads and writes Sprint Tasks on behalf of each developer, through a Lark Custom App and your own Lark login.
+
+<Intro>
+  - How to create the Lark Custom App and its permissions - Which IDs to copy from your Base - How to log in
+  from Mandor, and which fields Mandor adds
+</Intro>
+
+## Create the Custom App
+
+1. Open the Lark Developer Console (`open.larksuite.com/app`) and choose **Create Custom App**, for example named `mandor`.
+2. In **Credentials & Basic Info**, note the **App ID** and **App Secret**.
+3. In **Security Settings → Redirect URLs**, add `http://127.0.0.1:53682/callback`. If you change the port, use the same number in Mandor's **Callback port** setting.
+4. In **Permissions & Scopes**, add these user-token scopes:
+   - `bitable:app` to read and write Base records and fields
+   - `docs:document.comment:read` to read record comments (or `drive:drive:readonly` if your tenant does not offer it)
+   - `contact:contact.base:readonly` and `contact:user.base:readonly` to show people's names
+   - `offline_access` so you do not have to log in again every two hours
+5. In **Version Management & Release**, create a version and submit it to your tenant admin. The scopes apply once the version is approved.
+
+The app acts as the logged-in user, so you do not add a bot to the Base: access follows each developer's own permissions.
+
+<Security>
+  Never paste the App ID or App Secret into a chat or an issue. Mandor stores the secret in
+  `~/.mandor/lark.json` and your Lark token in `~/.mandor/secrets/`, both readable only by you.
+</Security>
+
+## Copy the IDs from your Base
+
+From the Base URL:
+
+- **`app_token`**: the part after `/base/`.
+- **Sprint Tasks table ID** and **Acceptance Criteria table ID**: the `table=tbl…` parameter when each table is open.
+
+## Log in from Mandor
+
+1. Open **Settings → Lark** and fill in the App ID, App Secret, `app_token`, and the two table IDs. Save.
+2. Press **Log in with Lark**. Your browser opens; approve access.
+3. When the page says "Logged in to Lark", go back to the app. The board loads the tasks assigned to you.
+
+If the app says the callback port is already in use, close the program using it, or change the port in the Lark console and in Mandor.
+
+## Fields Mandor adds
+
+On first login, Mandor creates its own fields if they are missing: `mandor_branch`, `mandor_pr`, `mandor_owner`, `mandor_comment_cursor`, `mandor_modified`, `Fix Notes`, and `mandor_design_gaps`. It never writes the fields people own: title, description, AC, and assignees.
+
+<Note>
+  If your account may not add fields, ask the Base owner to create them with exactly these names. All are
+  Text, except `mandor_pr` (URL) and `mandor_modified` (Modified time).
+</Note>

@@ -1,0 +1,41 @@
+export const metadata = { title: "GitHub and Claude Code · Mandor docs" };
+
+# GitHub and Claude Code
+
+The daemon opens pull requests with the GitHub CLI and runs agents with Claude Code. Both log in on the machine where the daemon runs: inside WSL on Windows.
+
+<Intro>
+  - How to log in to `gh` and Claude Code for Mandor - How to use more than one GitHub account - What Mandor
+  does and does not let the agent do
+</Intro>
+
+## GitHub CLI
+
+```bash
+gh auth login
+git config --global user.name "Your Name"
+git config --global user.email "you@company.com"
+```
+
+Use HTTPS when `gh` asks. The daemon pushes and opens PRs from a background service, so it does not use an ssh-agent session or the Windows credential manager.
+
+For several GitHub accounts, give each one a profile name in `gh`, and set **gh profile** on each repo in Mandor's settings.
+
+<Pitfall>
+  Protect your `main` branch with a GitHub ruleset. Mandor only pushes the task's own branch, but the ruleset
+  is the last line of defence.
+</Pitfall>
+
+## Claude Code
+
+Run `claude` once and log in with your subscription. Mandor starts the Claude Code CLI unmodified, with your subscription. It removes `ANTHROPIC_API_KEY` from the agent's environment so the subscription is always used.
+
+## What the agent may not do
+
+Mandor runs every agent behind a hook that denies:
+
+- `git push` and `gh`: pushing and PRs go through **Push & create PR**
+- reading credentials and Mandor's own files
+- changing the agent's configuration
+
+The agent works only in the task's worktree. Lark titles, AC, and comments reach it as untrusted content, not as instructions.

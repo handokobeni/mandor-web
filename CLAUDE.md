@@ -22,6 +22,19 @@ or reviewing code, or adding a dependency, and read the guide for what you touch
 - Test-first: behaviour is driven by Vitest + Testing Library tests; critical journeys
   (page load, demo, waitlist, mobile fit) have Playwright e2e.
 
+## Docs
+
+User docs live at `/docs` as MDX pages under `src/app/docs/**/page.mdx`. The table of contents
+(sidebar, Previous/Next) is `src/features/docs/model/nav.ts`; add every new page there. The
+content follows the `mandor` repo's README and `docs/runbook/*`; keep them in step.
+
+## Dependencies beyond the allow list
+
+| Package                                                      | Why                                                                  |
+| ------------------------------------------------------------ | -------------------------------------------------------------------- |
+| `@next/mdx`, `@mdx-js/loader`, `@mdx-js/react`, `@types/mdx` | The documentation pages are written in MDX, the official Next.js way |
+| `remark-gfm`                                                 | Markdown tables in the docs                                          |
+
 ## Decisions (do not re-ask)
 
 - **Waitlist has no backend.** The form validates the email and says sign-ups are not open

@@ -1,0 +1,32 @@
+export const metadata = { title: "Add a repo · Mandor docs" };
+
+# Add a repo
+
+Agents work in repos you register with the daemon. Each task gets its own git worktree, so agents never touch your checkout or each other's branches.
+
+<Intro>
+  - How to add a repo - Which settings matter, and when - How to work across several repos with a workspace
+</Intro>
+
+## Add the repo
+
+Open **Settings → Repos → Add** and choose the repo's path on the daemon's machine. Mandor reads the default branch from `origin/HEAD`. If that fails, run this in the repo:
+
+```bash
+git remote set-head origin --auto
+```
+
+## Repo settings
+
+| Setting                   | What it does                                                                                                                                              |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| gh profile                | The `gh` account that pushes and opens PRs for this repo.                                                                                                 |
+| Trusted reviewers and QA  | People whose Lark comments are forwarded to the agent in [Waiting Fix](/docs/waiting-fix). Search by name. Assignees and the reporter are always trusted. |
+| Read-only companion paths | Other folders the agent may read but never write, for example a shared design-token repo.                                                                 |
+| Extra agent allowlist     | Tool patterns the agent can run without asking, for example `Bash(pnpm test *)`. Anything not listed is denied.                                           |
+| Test mode                 | **Web** if the repo has an app the [AC reviewer](/docs/ac-review) can open in a browser; **No app** otherwise.                                            |
+| Push & PR gate            | **Block** or **Warn** when an AC fails review.                                                                                                            |
+
+## Workspaces
+
+A workspace groups repos that change together, for example an API and a web app. Start a task on a workspace and Mandor creates one worktree per repo on the same branch, and one PR per repo that changed.
