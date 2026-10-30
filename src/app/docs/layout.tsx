@@ -1,6 +1,8 @@
 import { Wrap } from "@/components/molecules";
 import { DocsPager, DocsSidebar, OnThisPage } from "@/features/docs";
 import { SiteFooter, SiteNav } from "@/features/landing";
+import { DocsJsonLd } from "@/features/seo";
+import { SITE_URL } from "@/lib/site";
 
 export default function DocsLayout({ children }: LayoutProps<"/docs">) {
   return (
@@ -33,6 +35,7 @@ export default function DocsLayout({ children }: LayoutProps<"/docs">) {
         </aside>
       </Wrap>
       <SiteFooter />
+      <DocsJsonLd site={SITE_URL.href} />
     </>
   );
 }

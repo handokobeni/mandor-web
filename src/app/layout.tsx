@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE } from "@/features/seo";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const spaceGrotesk = localFont({
@@ -18,17 +20,21 @@ const jetbrainsMono = localFont({
   display: "swap",
 });
 
-const description =
-  "Mandor puts every Claude Code agent on one kanban board, synced both ways with Lark Base. Each agent works in its own git worktree, opens a PR, and never merges to main. Early access.";
-
 export const metadata: Metadata = {
-  title: "Mandor · Run a crew of Claude Code agents from one board",
-  description,
+  metadataBase: SITE_URL,
+  title: { default: SITE_TITLE, template: `%s · ${SITE_NAME}` },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  alternates: { canonical: "/" },
   openGraph: {
-    title: "Mandor · Run a crew of Claude Code agents from one board",
-    description,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: "/",
+    siteName: SITE_NAME,
+    locale: "en_US",
     type: "website",
   },
+  twitter: { card: "summary_large_image", title: SITE_TITLE, description: SITE_DESCRIPTION },
 };
 
 export const viewport: Viewport = {

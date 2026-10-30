@@ -3,6 +3,14 @@ import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV === "development";
 
+// Canonical URLs, the sitemap, and robots.txt are absolute, built from SITE_URL
+// (src/lib/site.ts). Without it they point at localhost.
+if (!isDev && !process.env.SITE_URL?.trim()) {
+  console.warn(
+    "SITE_URL is not set: canonical URLs, sitemap.xml, and robots.txt will use http://localhost:3000.",
+  );
+}
+
 // Static page with no user-generated content: a static CSP keeps it
 // prerendered (nonces would force dynamic rendering). Inline scripts are
 // Next's own bootstrap; eval only in dev for React's error overlay.

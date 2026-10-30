@@ -4,7 +4,7 @@ import { DOC_SECTIONS, pagerFor, allDocPages, sectionOf } from "./nav";
 describe("docs navigation", () => {
   it("lists every page once, starting with Quick start at /docs", () => {
     const pages = allDocPages();
-    expect(pages[0]).toEqual({ href: "/docs", title: "Quick start" });
+    expect(pages[0]).toMatchObject({ href: "/docs", title: "Quick start" });
     expect(new Set(pages.map((p) => p.href)).size).toBe(pages.length);
     expect(DOC_SECTIONS.map((s) => s.title)).toEqual([
       "Get started",
@@ -15,7 +15,7 @@ describe("docs navigation", () => {
   });
 
   it("gives the previous and next page across sections", () => {
-    expect(pagerFor("/docs")).toEqual({
+    expect(pagerFor("/docs")).toMatchObject({
       prev: null,
       next: { href: "/docs/installation", title: "Installation" },
     });

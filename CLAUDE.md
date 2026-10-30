@@ -28,6 +28,15 @@ User docs live at `/docs` as MDX pages under `src/app/docs/**/page.mdx`. The tab
 (sidebar, Previous/Next) is `src/features/docs/model/nav.ts`; add every new page there. The
 content follows the `mandor` repo's README and `docs/runbook/*`; keep them in step.
 
+## SEO
+
+`SITE_URL` (e.g. `https://mandor.dev`) is the site's public origin, read once in `src/lib/site.ts`
+and validated there. It sets `metadataBase`, canonical URLs, `sitemap.xml`, `robots.txt`, and the
+JSON-LD URLs; **set it in every production build**. Unset, it falls back to `http://localhost:3000`
+and the build warns. Builders live in `src/features/seo`: each docs page's metadata comes from
+`docMetadata(href)`, whose title and description are in the docs table of contents, so a new page
+needs a `description` there. The 404 page is `noindex`.
+
 ## Dependencies beyond the allow list
 
 | Package                                                      | Why                                                                  |

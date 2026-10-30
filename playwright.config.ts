@@ -15,6 +15,8 @@ export default defineConfig({
   ],
   webServer: {
     command: `pnpm build && pnpm start -p ${PORT}`,
+    // Absolute URLs in metadata, sitemap, and robots come from SITE_URL.
+    env: { SITE_URL: "https://mandor.example" },
     url: `http://127.0.0.1:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
